@@ -8,7 +8,6 @@ app = FastAPI(
     description="300 Telegram Stars to'lov tizimi va 35 ta musiqa limiti bilan AI generator"
 )
 
-# CORS Sozlamalari
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,13 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- BIZNES MANTIQ VA MODELLAR ---
-
 USER_DATA_DB = {}
 
-STAR_PAYMENT_PRICE = 300   # 300 Telegram Stars
-MAX_MUSIC_LIMIT = 35       # Maksimal 35 ta musiqa
-MAX_DURATION_SECONDS = 360 # Eng uzoq musiqa davomiyligi: 6 daqiqa (360 sek)
+STAR_PAYMENT_PRICE = 300
+MAX_MUSIC_LIMIT = 35
+MAX_DURATION_SECONDS = 360
 
 
 class MusicGenerateRequest(BaseModel):
@@ -35,8 +32,6 @@ class PaymentVerifyRequest(BaseModel):
     telegram_payment_charge_id: str
     stars_amount: int
 
-
-# --- API ENDPOINTLAR ---
 
 @app.get("/")
 async def root():
@@ -52,9 +47,6 @@ async def verify_stars_payment(
     data: PaymentVerifyRequest, 
     x_user_id: str = Header(..., alias="X-User-ID")
 ):
-    """
-    300 Telegram Stars to'lovi xatosiz amalga oshirilganini tekshirish va aktivlashtirish
-    """
     if data.stars_amount < STAR_PAYMENT_PRICE:
         raise HTTPException(
             status_code=400, 
@@ -79,9 +71,6 @@ async def generate_music(
     request: MusicGenerateRequest, 
     x_user_id: str = Header(..., alias="X-User-ID")
 ):
-    """
-    Musiqa generatsiyasi: Faqat 300 Stars to'langanidan va limit tugamagandan keyin ishlaydi
-    """
     user_info = USER_DATA_DB.get(x_user_id)
 
     if not user_info or not user_info.get("has_paid"):
@@ -111,3 +100,4 @@ async def generate_music(
         "remaining_tracks": user_info["remaining_tracks"],
         "message": "Musiqa generatsiyasi boshlandi!"
     }
+
